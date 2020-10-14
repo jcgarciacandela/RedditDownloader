@@ -35,7 +35,7 @@ public class RedditDownloader {
 
     String urlSubreddit = "https://reddit.com/r/" + subredditActual + ".json?limit=100";
     String contenido = UtilMisc.leeURLHTTPS(urlSubreddit);
-
+    System.out.println(subredditActual);
     ObjectMapper mapper = new ObjectMapper();
 
     try {
@@ -55,23 +55,23 @@ public class RedditDownloader {
             String rutaSalida = rutaBase + System.getProperty("file.separator") + subredditActual + System.getProperty("file.separator") + author + "_" + nombreFichero;
 //            System.out.println(rutaSalida);
 
-            if (url.contains("imgur.com")) {
+            if (url.contains("imgur.com") && url.contains("gifv")) {
               rutaSalida=rutaSalida.replace(".gifv",".mp4");
             }
+
             File testRutaSalida = new File(rutaSalida);
             if (!testRutaSalida.exists()) {
-              System.out.println(url);
-              if (url.contains("imgur.com")) {
+              System.out.println(subredditActual+"\t"+url);
+              if (url.contains("imgur.com")  && url.contains("gifv")) {
                 String contenidoImgur = UtilMisc.leeURLHTTPS(url);
 //                System.out.println(contenidoImgur);
                 url = UtilMisc.recuperaRegexpGrupo("(?s)content=\"([^\"]*?\\.mp4)\"", contenidoImgur, 1);
-                System.out.println(url);
               }
               if (url != null && !url.isBlank()) {
                 new File(rutaSalida.substring(0, rutaSalida.lastIndexOf(System.getProperty("file.separator")))).mkdirs();
                 byte[] contenidoBinario = UtilMisc.leeURLImagenHTTPS(url);
                 UtilMisc.escribeFicheroBinario(rutaSalida, contenidoBinario);
-                Thread.sleep(2000);
+                Thread.sleep(2000); //TODO: A properties
               }
 
             }
