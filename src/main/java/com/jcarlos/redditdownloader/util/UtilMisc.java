@@ -43,7 +43,7 @@ public class UtilMisc {
   }
 
   public static byte[] leeURLImagenHTTPS(String direccion) {
-    System.out.println(new java.util.Date() + " Leyendo imagen: " + direccion);
+
     System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2");
     // -Dhttps.protocols=TLSv1.1,TLSv1.2
     try {
@@ -97,7 +97,6 @@ public class UtilMisc {
       FileOutputStream fos = new FileOutputStream(ruta);
       fos.write(contenido);
       fos.close();
-
     } catch (IOException ex) {
       System.err.println(ex);
     }
