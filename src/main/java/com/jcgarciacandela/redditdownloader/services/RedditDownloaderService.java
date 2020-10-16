@@ -1,8 +1,9 @@
-package com.jcarlos.redditdownloader.services;
+package com.jcgarciacandela.redditdownloader.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jcarlos.redditdownloader.util.UtilMisc;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.jcgarciacandela.redditdownloader.util.UtilMisc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -16,52 +17,57 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
-public class RedditDownloader {
-  @Autowired
-  private ApplicationContext context;
+public class RedditDownloaderService {
+  private final static Logger log = LoggerFactory.getLogger(RedditDownloaderService.class);
+
+  private final ApplicationContext context;
 
   @Value("#{'${subreddits}'.split(',')}")
   private ArrayList<String> subreddits;
 
-  private LinkedHashMap<String, String> urlImages = new LinkedHashMap<>();
+  private final LinkedHashMap<String, String> urlImages = new LinkedHashMap<>();
 
-  @Value("${ruta}")
-  private String rutaBase;
+  @Value("${outputPath}")
+  private String basePath;
 
   @Value("#{new Boolean('${onlyOnePass:false}')}")
   boolean onlyOnePass;
 
-  @PostConstruct
-  public void onStartup() {
-    retrievePosts();
+
+  int limit;
+  @Value("${userAgent:'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_8; en-US) AppleWebKit/532.5 (KHTML, like Gecko) Chrome/4.0.249.0 Safari/532.5'}")
+  String userAgent;
+
+  public RedditDownloaderService(ApplicationContext context) {
+    this.context = context;
   }
 
-  @Scheduled(fixedRateString = "${retardoImagenes}")
-  private void retrieveImages() {
+//  @PostConstruct
+//  public void onStartup() {
+//    retrievePosts();
+//  }
 
+  @Scheduled(fixedRateString = "${imagesDelay}")
+  private void retrieveImages() {
     if (urlImages.size() == 0) return;
 
     String filePath = urlImages.entrySet().iterator().next().getKey();
     String url = urlImages.remove(filePath);
 
     if (url.contains("imgur.com") && url.contains("gifv")) {
-      filePath = filePath.replace(".gifv", ".mp4");
+      url = UtilMisc.recuperaRegexpGrupo("(?s)content=\"([^\"]*?\\.mp4)\"", UtilMisc.readURLHTTPS(url,userAgent), 1);
     }
 
-    if (url.contains("imgur.com") && url.contains("gifv")) {
-      url = UtilMisc.recuperaRegexpGrupo("(?s)content=\"([^\"]*?\\.mp4)\"", UtilMisc.leeURLHTTPS(url), 1);
-    }
-    if (url != null && !url.isBlank()) {
+    if (url != null && !url.trim().isEmpty()) {
       new File(filePath.substring(0, filePath.lastIndexOf(System.getProperty("file.separator")))).mkdirs();
-      byte[] contenidoBinario = UtilMisc.leeURLImagenHTTPS(url);
-      System.out.println("Writing " + filePath);
+      byte[] contenidoBinario = UtilMisc.readBinaryHTTPS(url);
+      log.info("[" + urlImages.size() + " images in queue]\tWriting " + filePath);
       UtilMisc.escribeFicheroBinario(filePath, contenidoBinario);
     }
   }
 
-  @Scheduled(fixedRateString = "${retardoSubreddits}")
+  @Scheduled(fixedRateString = "${subredditsDelay}")
   private void retrievePosts() {
-
     if (subreddits.size() == 0 && urlImages.size() == 0) {
       ((ConfigurableApplicationContext) context).close();
     }
@@ -71,13 +77,13 @@ public class RedditDownloader {
       subreddits.add(subredditActual);
     }
 
-    String urlSubreddit = "https://reddit.com/r/" + subredditActual + ".json?limit=100";
-    String contenido = UtilMisc.leeURLHTTPS(urlSubreddit);
-    System.out.println("Retrieving posts from " + subredditActual);
+    String urlSubreddit = "https://reddit.com/r/" + subredditActual + ".json?limit=" + limit;
+    String content = UtilMisc.readURLHTTPS(urlSubreddit,userAgent);
+    log.info("Retrieving posts from " + subredditActual);
     ObjectMapper mapper = new ObjectMapper();
 
     try {
-      Map<String, Object> map = mapper.readValue(contenido, Map.class);
+      Map<String, Object> map = mapper.readValue(content, Map.class);
       if (map != null) {
         map = (Map<String, Object>) map.get("data");
         ArrayList<Map<String, Object>> children = (ArrayList<Map<String, Object>>) map.get("children");
@@ -88,12 +94,13 @@ public class RedditDownloader {
           String author = (String) map.get("author");
 
           String nombreFichero = url.substring(url.lastIndexOf("/") + 1);
-
           if (nombreFichero.endsWith("jpg") || nombreFichero.endsWith("gifv")) {
-            String rutaSalida = rutaBase + System.getProperty("file.separator") + subredditActual + System.getProperty("file.separator") + author + "_" + nombreFichero;
-            File testRutaSalida = new File(rutaSalida);
-            if (!testRutaSalida.exists()) {
-              urlImages.put(rutaSalida, url);
+            String outputFilePath = basePath + System.getProperty("file.separator") + subredditActual + System.getProperty("file.separator") + author + "_" + nombreFichero;
+            if (url.contains("imgur.com") && url.contains("gifv")) {
+              outputFilePath = outputFilePath.replace(".gifv", ".mp4");
+            }
+            if (!new File(outputFilePath).exists()) {
+              urlImages.put(outputFilePath, url);
             }
           }
         }

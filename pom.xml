@@ -8,32 +8,22 @@
         <version>2.3.4.RELEASE</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.jcarlos</groupId>
+    <groupId>com.jcgarciacandela</groupId>
     <artifactId>redditdownloader</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>redditdownloader</name>
-    <description>Recupera imágenes y gif de subreddits</description>
+    <description>Retrieve images and some mp4 fromsubreddits</description>
 
     <properties>
-        <java.version>11</java.version>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <scope>runtime</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -52,7 +42,6 @@
             <version>2.11.1</version>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
