@@ -1,6 +1,6 @@
 # RedditDownloader
 
-Retrieve images (and some mp4) from specified subreddits.
+Retrieve images (and some mp4) from specified subreddits. Uses Spring Boot with @Scheduled methods.
 
 Usage:
 Windows: `mvnw.cmd spring-boot:run`
