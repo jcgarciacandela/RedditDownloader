@@ -94,9 +94,10 @@ public class RedditDownloaderService {
           String url = (String) map.get("url");
           String author = (String) map.get("author");
 
-          String nombreFichero = url.substring(url.lastIndexOf("/") + 1);
-          if (nombreFichero.endsWith("jpg") || nombreFichero.endsWith("gifv")) {
-            String outputFilePath = basePath + System.getProperty("file.separator") + subredditActual + System.getProperty("file.separator") + author + "_" + nombreFichero;
+          String fileName = url.substring(url.lastIndexOf("/") + 1);
+
+          if (fileName.endsWith("jpg") || fileName.endsWith("gifv") || fileName.endsWith("png")) {
+            String outputFilePath = basePath + System.getProperty("file.separator") + subredditActual + System.getProperty("file.separator") + author + "_" + fileName;
             if (url.contains("imgur.com") && url.contains("gifv")) {
               outputFilePath = outputFilePath.replace(".gifv", ".mp4");
             }
