@@ -33,8 +33,9 @@ public class RedditDownloaderService {
   @Value("#{new Boolean('${onlyOnePass:false}')}")
   boolean onlyOnePass;
 
-
+  @Value("${postsToRetrieve}")
   int limit;
+
   @Value("${userAgent:'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_8; en-US) AppleWebKit/532.5 (KHTML, like Gecko) Chrome/4.0.249.0 Safari/532.5'}")
   String userAgent;
 
