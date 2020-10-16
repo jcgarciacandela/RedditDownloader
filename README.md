@@ -5,9 +5,9 @@ Retrieve images (and some mp4) from specified subreddits.
 Usage:
 Windows: `mvnw.cmd spring-boot:run`
 Linux: `mvnw spring-boot:run`
-Or generate `mvn clean package` and run with java -jar
+Or generate `mvn clean package` and run with `java -jar`
 
-Edit application.properties before compile or put in the same folder as jar.
+Edit application.properties before compile/run or put in the same folder as jar (https://stackoverflow.com/questions/39427675/application-properties-outside-jar-file-how-to/39428564)
 
 application.properties
 ```
